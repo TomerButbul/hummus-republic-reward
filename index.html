@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>You're all set — Hummus Republic</title>
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,600,700,800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --green:#1C392F; --cream:#faf9f5; --yellow:#F6CA75; --muted:#5C5049; --line:#E7E1D8; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    background:var(--cream);
+    font-family:"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color:var(--green);
+    padding:40px 26px;
+  }
+  .wrap{ width:100%; max-width:460px; }
+  .check{
+    width:88px; height:88px; border-radius:999px; background:var(--green);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 26px;
+    box-shadow:0 18px 40px rgba(28,57,47,.34);
+  }
+  h1{ font-size:clamp(32px,8vw,48px); line-height:1.02; letter-spacing:.5px; text-transform:uppercase; font-weight:800; margin-bottom:12px; }
+  .sub{ font-size:clamp(15px,4.2vw,18px); line-height:1.55; color:var(--muted); margin:0 auto 26px; max-width:400px; }
+  .btns{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
+  .badge{ display:inline-flex; transition:transform .15s ease; }
+  .badge:hover{ transform:translateY(-2px); }
+  .badge img{ display:block; }
+  #apple img{ height:56px; }
+  #google img{ height:82px; }
+  .hidden{ display:none !important; }
+
+  /* Perks (sheet-driven) */
+  .perks{
+    margin-top:34px; text-align:left; background:#fff; border:1px solid var(--line);
+    border-radius:18px; padding:20px 22px; box-shadow:0 10px 30px rgba(28,57,47,.06);
+  }
+  .perks h2{ font-size:13px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--green); margin-bottom:14px; opacity:.85; }
+  .perk{ display:flex; align-items:flex-start; gap:12px; padding:9px 0; }
+  .tick{ flex:0 0 auto; width:24px; height:24px; border-radius:999px; background:var(--green); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .perk p{ font-size:15.5px; line-height:1.4; font-weight:700; color:#2b2b2b; }
+
+  /* Steps */
+  .steps{ margin-top:18px; text-align:left; background:#fff; border:1px solid var(--line); border-radius:18px; padding:20px 22px 6px; box-shadow:0 10px 30px rgba(28,57,47,.06); }
+  .steps h2{ font-size:13px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--green); margin-bottom:4px; opacity:.85; }
+  .step{ display:flex; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); }
+  .step:last-child{ border-bottom:none; }
+  .num{ flex:0 0 auto; width:29px; height:29px; border-radius:999px; background:var(--green); color:#fff; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .step p{ font-size:15px; line-height:1.5; color:#2b2b2b; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="check" aria-hidden="true">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#F6CA75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1>You're all set!</h1>
+    <p class="sub" id="sub">Download the Hummus Republic app and log in with the same number to unlock your reward.</p>
+
+    <div class="btns">
+      <a class="badge" id="apple" href="https://apps.apple.com/us/app/hummus-republic-app/id6737941560" target="_blank" rel="noreferrer">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" />
+      </a>
+      <a class="badge" id="google" href="https://play.google.com/store/apps/details?id=ai.appfront.thehummusrepublic" target="_blank" rel="noreferrer">
+        <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" />
+      </a>
+    </div>
+
+    <!-- Sheet-driven perks (hidden until loaded) -->
+    <div class="perks hidden" id="perks">
+      <h2 id="perks-title">Your rewards</h2>
+      <div id="perks-list"></div>
+    </div>
+
+    <div class="steps">
+      <h2>How to get started</h2>
+      <div class="step"><div class="num">2</div><p>Download the Hummus Republic app.</p></div>
+      <div class="step"><div class="num">3</div><p>Log in with the phone number you just signed up with.</p></div>
+      <div class="step"><div class="num">4</div><p>Make your first purchase to activate your rewards.</p></div>
+      <div class="step"><div class="num">5</div><p>Your points &amp; perks apply automatically — including a welcome bowl.</p></div>
+      <div class="step"><div class="num">6</div><p>Come back anytime and enjoy your exclusive offers.</p></div>
+    </div>
+  </div>
+
+  <!-- Static template cloned per perk (no innerHTML with sheet data) -->
+  <template id="perk-tpl">
+    <div class="perk">
+      <span class="tick" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F6CA75" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </span>
+      <p></p>
+    </div>
+  </template>
+
+  <script>
+  (function(){
+    /* ---- platform-aware store badges ---- */
+    var ua = navigator.userAgent || "";
+    var isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var isAndroid = /Android/i.test(ua);
+    if (isIOS) document.getElementById("google").classList.add("hidden");
+    else if (isAndroid) document.getElementById("apple").classList.add("hidden");
+
+    /* ---- who am I? read the identity Framer passed in the URL ---- */
+    var q = new URLSearchParams(location.search);
+    var slug = (q.get("p") || "").trim().toLowerCase();
+    var aud  = (q.get("aud") || "member").trim().toLowerCase();
+    var isEmp = aud.indexOf("emp") === 0 || aud.indexOf("staff") === 0;
+    if (!slug) return; // no context → generic page stays as-is
+
+    /* ---- pull the offer from the SAME Partners sheet (one source of truth) ---- */
+    var SHEET = "https://docs.google.com/spreadsheets/d/1GyGj5DXqfvAi4qfCeLlEoIZGhx0Cm2BJR9mxKaPzGuE/gviz/tq?tqx=out:json&sheet=Partners&headers=1";
+
+    fetch(SHEET, { cache: "no-store" }).then(function(r){ return r.text(); }).then(function(text){
+      var m = text.match(/setResponse\(([\s\S]+)\)/);
+      if (!m) return;
+      var json = JSON.parse(m[1]);
+      var cols = (json.table.cols || []).map(function(c){ return (c.label || "").trim().toLowerCase(); });
+      var rows = (json.table.rows || []).map(function(row){
+        var o = {}; (row.c || []).forEach(function(cell, i){
+          var key = cols[i]; if (!key || !cell) return;
+          var v = (cell.f != null ? cell.f : cell.v);
+          if (v != null) o[key] = String(v);
+        });
+        return o;
+      });
+
+      var p = rows.filter(function(o){ return (o["slug"] || "").trim().toLowerCase() === slug; })[0];
+      if (!p) return;
+
+      var name = p["partner name"] || p["name"] || "";
+      var offerRaw = isEmp
+        ? (p["employee offer"] || p["employees offer"] || p["staff offer"] || "")
+        : (p["member offer"] || p["members offer"] || "");
+
+      if (name) {
+        document.getElementById("sub").textContent =
+          "Welcome, " + name + " " + (isEmp ? "team member" : "member") +
+          "! Download the app and log in with the same number to unlock your rewards.";
+      }
+
+      var offers = offerRaw.split(/[\n|]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+      if (offers.length) {
+        document.getElementById("perks-title").textContent =
+          (name ? name + " " : "") + (isEmp ? "team perks" : "member perks");
+        var tpl = document.getElementById("perk-tpl");
+        var list = document.getElementById("perks-list");
+        offers.forEach(function(o){
+          var node = tpl.content.cloneNode(true);
+          node.querySelector("p").textContent = o; // safe: plain text, no innerHTML
+          list.appendChild(node);
+        });
+        document.getElementById("perks").classList.remove("hidden");
+      }
+    }).catch(function(){ /* stay on the generic page if the sheet is unreachable */ });
+  })();
+  </script>
+</body>
+</html>
