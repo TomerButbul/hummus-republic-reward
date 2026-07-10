@@ -51,10 +51,22 @@
   .step:last-child{ border-bottom:none; }
   .num{ flex:0 0 auto; width:29px; height:29px; border-radius:999px; background:var(--green); color:#fff; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; margin-top:1px; }
   .step p{ font-size:15px; line-height:1.5; color:#2b2b2b; }
+
+  /* Wide screens: two columns (hero | cards) so it fills the space and gets
+     shorter, instead of a narrow centered column with big empty margins. */
+  @media (min-width:720px){
+    .wrap{ max-width:900px; display:flex; align-items:center; gap:46px; }
+    .hero{ flex:1 1 0; min-width:0; }
+    .cards{ flex:1 1 0; min-width:0; }
+    .perks{ margin-top:0; }
+    .steps{ margin-top:16px; }
+    h1{ font-size:clamp(34px,4vw,50px); }
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
+   <div class="hero">
     <div class="check" aria-hidden="true">
       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#F6CA75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
     </div>
@@ -69,7 +81,9 @@
         <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" />
       </a>
     </div>
+   </div>
 
+   <div class="cards">
     <!-- Sheet-driven perks (hidden until loaded) -->
     <div class="perks hidden" id="perks">
       <h2 id="perks-title">Your rewards</h2>
@@ -87,6 +101,7 @@
         <div class="step"><div class="num">5</div><p>Come back anytime and enjoy your exclusive offers.</p></div>
       </div>
     </div>
+   </div>
   </div>
 
   <!-- Static templates cloned per row (no innerHTML with sheet data) -->
