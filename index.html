@@ -9,16 +9,16 @@
 <style>
   :root{ --green:#1C392F; --cream:#faf9f5; --yellow:#F6CA75; --muted:#5C5049; --line:#E7E1D8; }
   *{ box-sizing:border-box; margin:0; padding:0; }
-  html,body{ height:100%; }
+  html,body{ height:100%; overflow:hidden; }  /* never scroll — we scale to fit */
   body{
     min-height:100vh;
     display:flex; align-items:center; justify-content:center; text-align:center;
     background:var(--cream);
     font-family:"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color:var(--green);
-    padding:40px 26px;
+    padding:22px 22px;
   }
-  .wrap{ width:100%; max-width:460px; }
+  .wrap{ width:100%; max-width:460px; transform-origin:center center; will-change:transform; }
   .check{
     width:88px; height:88px; border-radius:999px; background:var(--green);
     display:flex; align-items:center; justify-content:center; margin:0 auto 26px;
@@ -76,17 +76,20 @@
       <div id="perks-list"></div>
     </div>
 
+    <!-- Steps: default shown immediately; replaced by sheet steps if present -->
     <div class="steps">
       <h2>How to get started</h2>
-      <div class="step"><div class="num">2</div><p>Download the Hummus Republic app.</p></div>
-      <div class="step"><div class="num">3</div><p>Log in with the phone number you just signed up with.</p></div>
-      <div class="step"><div class="num">4</div><p>Make your first purchase to activate your rewards.</p></div>
-      <div class="step"><div class="num">5</div><p>Your points &amp; perks apply automatically — including a welcome bowl.</p></div>
-      <div class="step"><div class="num">6</div><p>Come back anytime and enjoy your exclusive offers.</p></div>
+      <div id="steps-list">
+        <div class="step"><div class="num">1</div><p>Download the Hummus Republic app.</p></div>
+        <div class="step"><div class="num">2</div><p>Log in with the phone number you just signed up with.</p></div>
+        <div class="step"><div class="num">3</div><p>Make your first purchase to activate your rewards.</p></div>
+        <div class="step"><div class="num">4</div><p>Your points &amp; perks apply automatically — including a welcome bowl.</p></div>
+        <div class="step"><div class="num">5</div><p>Come back anytime and enjoy your exclusive offers.</p></div>
+      </div>
     </div>
   </div>
 
-  <!-- Static template cloned per perk (no innerHTML with sheet data) -->
+  <!-- Static templates cloned per row (no innerHTML with sheet data) -->
   <template id="perk-tpl">
     <div class="perk">
       <span class="tick" aria-hidden="true">
@@ -94,6 +97,9 @@
       </span>
       <p></p>
     </div>
+  </template>
+  <template id="step-tpl">
+    <div class="step"><div class="num"></div><p></p></div>
   </template>
 
   <script>
@@ -105,6 +111,23 @@
     if (isIOS) document.getElementById("google").classList.add("hidden");
     else if (isAndroid) document.getElementById("apple").classList.add("hidden");
 
+    /* ---- fit-to-viewport: scale the whole card down if it's taller/wider than
+           the screen, so it ALWAYS fits with no scrollbar, any size or iframe. ---- */
+    function fit(){
+      var wrap = document.querySelector(".wrap");
+      if (!wrap) return;
+      wrap.style.transform = "none";               // reset to measure natural size
+      var h = wrap.offsetHeight, w = wrap.offsetWidth;
+      if (!h || !w) return;
+      var scale = Math.min(1, (window.innerHeight - 24) / h, (window.innerWidth - 24) / w);
+      wrap.style.transform = scale < 1 ? "scale(" + scale.toFixed(4) + ")" : "none";
+    }
+    fit();
+    requestAnimationFrame(fit);                     // after first paint
+    window.addEventListener("resize", fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); // after webfont
+    window.__fit = fit;                             // so the sheet loader can re-fit
+
     /* ---- who am I? read the identity Framer passed in the URL ---- */
     var q = new URLSearchParams(location.search);
     var slug = (q.get("p") || "").trim().toLowerCase();
@@ -112,7 +135,7 @@
     var isEmp = aud.indexOf("emp") === 0 || aud.indexOf("staff") === 0;
     if (!slug) return; // no context → generic page stays as-is
 
-    /* ---- pull the offer from the SAME Partners sheet (one source of truth) ---- */
+    /* ---- pull everything from the SAME Partners sheet (one source of truth) ---- */
     var SHEET = "https://docs.google.com/spreadsheets/d/1GyGj5DXqfvAi4qfCeLlEoIZGhx0Cm2BJR9mxKaPzGuE/gviz/tq?tqx=out:json&sheet=Partners&headers=1";
 
     fetch(SHEET, { cache: "no-store" }).then(function(r){ return r.text(); }).then(function(text){
@@ -137,26 +160,53 @@
         ? (p["employee offer"] || p["employees offer"] || p["staff offer"] || "")
         : (p["member offer"] || p["members offer"] || "");
 
+      /* welcome line */
       if (name) {
         document.getElementById("sub").textContent =
           "Welcome, " + name + " " + (isEmp ? "team member" : "member") +
           "! Download the app and log in with the same number to unlock your rewards.";
       }
 
+      /* perks list from the offer cell (split on | or new lines) */
       var offers = offerRaw.split(/[\n|]+/).map(function(s){ return s.trim(); }).filter(Boolean);
       if (offers.length) {
         document.getElementById("perks-title").textContent =
           (name ? name + " " : "") + (isEmp ? "team perks" : "member perks");
-        var tpl = document.getElementById("perk-tpl");
-        var list = document.getElementById("perks-list");
+        var ptpl = document.getElementById("perk-tpl");
+        var plist = document.getElementById("perks-list");
         offers.forEach(function(o){
-          var node = tpl.content.cloneNode(true);
-          node.querySelector("p").textContent = o; // safe: plain text, no innerHTML
-          list.appendChild(node);
+          var node = ptpl.content.cloneNode(true);
+          node.querySelector("p").textContent = o; // safe: plain text
+          plist.appendChild(node);
         });
         document.getElementById("perks").classList.remove("hidden");
       }
-    }).catch(function(){ /* stay on the generic page if the sheet is unreachable */ });
+
+      /* steps from the sheet (per partner): a "Steps" cell (| or newline separated),
+         or individual "Step 1".."Step N" columns. Numbering always restarts at 1. */
+      var steps = [];
+      if (p["steps"]) {
+        steps = p["steps"].split(/[\n|]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+      } else {
+        for (var i = 1; i <= 12; i++) {
+          var v = p["step " + i];
+          if (v && v.trim()) steps.push(v.trim());
+        }
+      }
+      if (steps.length) {
+        var stpl = document.getElementById("step-tpl");
+        var slist = document.getElementById("steps-list");
+        slist.textContent = ""; // clear the defaults
+        steps.forEach(function(s, idx){
+          var node = stpl.content.cloneNode(true);
+          node.querySelector(".num").textContent = String(idx + 1); // 1-based
+          node.querySelector("p").textContent = s;                  // safe: plain text
+          slist.appendChild(node);
+        });
+      }
+
+      if (window.__fit) window.__fit();  // content changed → re-fit to viewport
+    }).catch(function(){ if (window.__fit) window.__fit(); });
   })();
   </script>
 </body>
