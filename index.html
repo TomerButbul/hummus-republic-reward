@@ -86,12 +86,6 @@
    </div>
 
    <div class="cards">
-    <!-- Sheet-driven perks (hidden until loaded) -->
-    <div class="perks hidden" id="perks">
-      <h2 id="perks-title">Your rewards</h2>
-      <div id="perks-list"></div>
-    </div>
-
     <!-- Steps: default shown immediately; replaced by sheet steps if present -->
     <div class="steps">
       <h2>How to get started</h2>
@@ -100,7 +94,7 @@
         <div class="step"><div class="num">2</div><p>Make your first purchase.</p></div>
         <div class="step"><div class="num">3</div><p>We'll automatically add <span class="hl">1,600 Rewards Points</span> to your account.</p></div>
         <div class="step"><div class="num">4</div><p>Redeem your points for a <span class="hl">FREE Bowl</span> on your next visit.</p></div>
-        <div class="step"><div class="num">5</div><p>Enjoy <span class="hl">your offers</span> anytime.</p></div>
+        <div class="step"><div class="num">5</div><p>Enjoy <span class="hl">your offer</span> anytime.</p></div>
       </div>
       <p class="fineprint">The free welcome bowl is a one-time reward for signing up.</p>
     </div>
@@ -108,14 +102,6 @@
   </div>
 
   <!-- Static templates cloned per row (no innerHTML with sheet data) -->
-  <template id="perk-tpl">
-    <div class="perk">
-      <span class="tick" aria-hidden="true">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F6CA75" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-      </span>
-      <p></p>
-    </div>
-  </template>
   <template id="step-tpl">
     <div class="step"><div class="num"></div><p></p></div>
   </template>
@@ -174,30 +160,12 @@
       if (!p) return;
 
       var name = p["partner name"] || p["name"] || "";
-      var offerRaw = isEmp
-        ? (p["employee offer"] || p["employees offer"] || p["staff offer"] || "")
-        : (p["member offer"] || p["members offer"] || "");
 
       /* welcome line */
       if (name) {
         document.getElementById("sub").textContent =
           "Welcome, " + name + " " + (isEmp ? "team member" : "member") +
           "! Download the app and log in with the same number to unlock your rewards.";
-      }
-
-      /* perks list from the offer cell (split on | or new lines) */
-      var offers = offerRaw.split(/[\n|]+/).map(function(s){ return s.trim(); }).filter(Boolean);
-      if (offers.length) {
-        document.getElementById("perks-title").textContent =
-          (name ? name + " " : "") + (isEmp ? "team perks" : "member perks");
-        var ptpl = document.getElementById("perk-tpl");
-        var plist = document.getElementById("perks-list");
-        offers.forEach(function(o){
-          var node = ptpl.content.cloneNode(true);
-          node.querySelector("p").textContent = o; // safe: plain text
-          plist.appendChild(node);
-        });
-        document.getElementById("perks").classList.remove("hidden");
       }
 
       /* steps from the sheet (per partner): a "Steps" cell (| or newline separated),
