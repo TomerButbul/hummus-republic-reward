@@ -1,10 +1,10 @@
-import { json, store, isEduEmail, sha256 } from "./_shared.mjs"
+import { json, noContent, store, isEduEmail, sha256 } from "./_shared.mjs"
 
 const MAX_ATTEMPTS = 6
 
 export default async (req) => {
   const origin = req.headers.get("origin")
-  if (req.method === "OPTIONS") return json(204, {}, origin)
+  if (req.method === "OPTIONS") return noContent(origin)
   if (req.method !== "POST") return json(405, { error: "method" }, origin)
 
   let body

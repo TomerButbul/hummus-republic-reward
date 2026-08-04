@@ -32,6 +32,11 @@ export const corsHeaders = (origin) => {
 export const json = (status, body, origin) =>
   new Response(JSON.stringify(body), { status, headers: corsHeaders(origin) })
 
+/* 204 means No Content — it MUST NOT carry a body, or the runtime throws and
+   the preflight 502s, which silently blocks every browser request. */
+export const noContent = (origin) =>
+  new Response(null, { status: 204, headers: corsHeaders(origin) })
+
 export const store = () => getStore({ name: "email-codes", consistency: "strong" })
 
 /** Only .edu, and only a well-formed address. */

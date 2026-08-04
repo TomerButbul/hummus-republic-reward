@@ -1,4 +1,4 @@
-import { json, store, isEduEmail, makeCode, sha256 } from "./_shared.mjs"
+import { json, noContent, store, isEduEmail, makeCode, sha256 } from "./_shared.mjs"
 
 const CODE_TTL_MS = 10 * 60 * 1000 // 10 minutes
 const RESEND_MAX_PER_EMAIL = 5 // per hour
@@ -6,7 +6,7 @@ const RESEND_WINDOW_MS = 60 * 60 * 1000
 
 export default async (req) => {
   const origin = req.headers.get("origin")
-  if (req.method === "OPTIONS") return json(204, {}, origin)
+  if (req.method === "OPTIONS") return noContent(origin)
   if (req.method !== "POST") return json(405, { error: "method" }, origin)
 
   let body
